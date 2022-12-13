@@ -1,5 +1,4 @@
-require('dotenv').config()
-
+require('dotenv').config();
 module.exports = {
   "development": {
     "username": process.env.DB_USER,
@@ -22,4 +21,4 @@ module.exports = {
     "host": process.env.DB_HOSTNAME_API,
     "dialect": "mysql"
   }
-}
+};

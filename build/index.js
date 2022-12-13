@@ -11,22 +11,14 @@ const dotenv_1 = require("dotenv");
 const compression_1 = __importDefault(require("compression"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
-// import createError from 'http-errors'
-const http_1 = __importDefault(require("http"));
 //routes
 const UserRoute_1 = __importDefault(require("./routes/UserRoute"));
+// import ImageResize from "./middlewares/Image";
 class App {
     constructor() {
         this.app = (0, express_1.default)();
         this.plugins();
-        this.storage = multer_1.default.diskStorage({
-            destination: function (req, file, cb) {
-                cb(null, './public/users');
-            },
-            filename: function (req, file, cb) {
-                cb(null, file.originalname);
-            }
-        });
+        this.storage = multer_1.default.memoryStorage();
         this.upload = (0, multer_1.default)({ storage: this.storage });
         this.route();
         (0, dotenv_1.config)();
@@ -49,9 +41,9 @@ class App {
 }
 const port = 8000;
 const app = new App().app;
-// app.listen(port, () => {
-//     console.log("server up " + port);
-// })
-http_1.default.createServer(app).listen(port, () => {
-    console.log("server " + port);
+app.listen(port, () => {
+    console.log("server up " + port);
 });
+// http.createServer(app).listen(port, () => {
+//     console.log("server " + port);
+// })

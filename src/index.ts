@@ -6,11 +6,11 @@ import { config as dotenv } from 'dotenv'
 import compression from 'compression'
 import cors from 'cors'
 import helmet from "helmet"
-// import createError from 'http-errors'
 import http from 'http'
 
 //routes
 import UserRoute from "./routes/UserRoute";
+
 
 class App {
     public app: Application
@@ -20,14 +20,7 @@ class App {
     constructor() {
         this.app = express()
         this.plugins()
-        this.storage = multer.diskStorage({
-            destination: function (req, file, cb) {
-                cb(null, './public/users')
-            },
-            filename: function (req, file, cb) {
-                cb(null, file.originalname)
-            }
-        })
+        this.storage = multer.memoryStorage()
         this.upload = multer({ storage: this.storage })
         this.route()
         dotenv()
@@ -55,11 +48,10 @@ class App {
 const port: number = 8000
 const app = new App().app
 
-// app.listen(port, () => {
-//     console.log("server up " + port);
-// })
-
-http.createServer(app).listen(port, () => {
-    console.log("server " + port);
-
+app.listen(port, () => {
+    console.log("server up " + port);
 })
+
+// http.createServer(app).listen(port, () => {
+//     console.log("server " + port);
+// })

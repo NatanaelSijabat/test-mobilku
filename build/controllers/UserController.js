@@ -13,95 +13,116 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const sharp_1 = __importDefault(require("sharp"));
+const fs_1 = __importDefault(require("fs"));
 const db = require('../db/models');
 class UserController {
     constructor() {
         this.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const data = yield db.User.findAll({
-                    attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir']
-                });
-                return res.status(200).json({ data });
-            }
-            catch (error) {
-                return res.send({ error: 'No data' });
-            }
+            const data = yield db.user.findAll({
+                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
+            });
+            return res.status(200).json({ data });
         });
         this.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b, _c, _d, _e;
             const { nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir } = req.body;
             const foto = (_a = req.file) === null || _a === void 0 ? void 0 : _a.originalname;
+            yield (0, sharp_1.default)((_b = req.file) === null || _b === void 0 ? void 0 : _b.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + ((_c = req.file) === null || _c === void 0 ? void 0 : _c.originalname));
+            yield (0, sharp_1.default)((_d = req.file) === null || _d === void 0 ? void 0 : _d.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + ((_e = req.file) === null || _e === void 0 ? void 0 : _e.originalname));
             if (!req.file || Object.keys(req.file).length === 0) {
                 return res.status(400).json({
                     message: 'no files upload'
                 });
             }
-            (0, sharp_1.default)(req.file.path).resize({ width: 500, height: 500 }).toFile(`public/users/500px/${req.file.originalname}`);
-            (0, sharp_1.default)(req.file.path).resize({ width: 1000, height: 1000 }).toFile(`public/users/1000px/${req.file.originalname}`);
-            const data = yield db.User.create({
+            const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
+            const data = yield db.user.create({
                 nama,
                 tanggal_lahir,
                 usia,
                 no_wa,
                 asal_kota,
                 pendidikan_terakhir,
-                foto
+                foto,
+                foto_url
             });
-            return res.status(201).json({ data });
+            return res.status(201).send({
+                data
+            });
         });
         this.show = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
-            const data = yield db.User.findOne({
+            const data = yield db.user.findOne({
                 where: {
                     id: id
                 },
-                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto']
+                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
             });
             if (!data)
                 return res.status(404).json({ message: 'no data found' });
             return res.json(data);
         });
         this.update = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            var _b, _c;
+            var _f, _g, _h, _j;
             const { id } = req.params;
-            const data = yield db.User.findOne({
+            const data = yield db.user.findOne({
                 where: {
                     id: id
                 },
-                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto']
+                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
             });
             if (!data)
                 return res.status(404).json({ message: 'no data found' });
-            let foto = "";
-            if (req.file === null) {
+            const { nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir } = req.body;
+            let foto = '';
+            if (((_f = req.file) === null || _f === void 0 ? void 0 : _f.originalname) == null) {
                 foto = data.foto;
+                const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
+                yield db.user.update({
+                    nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir, foto, foto_url
+                }, {
+                    where: { id }
+                });
             }
             else {
-                const foto = (_b = req.file) === null || _b === void 0 ? void 0 : _b.originalname;
-                // const fotoPath = `./public/users/${data.foto}`
-                // fs.unlinkSync(fotoPath)
-                // const fotoPath500px = `./public/users/500px/${data.foto}`
-                // fs.unlinkSync(fotoPath500px)
-                // const fotoPath1000px = `./public/users/1000px/${data.foto}`
-                // fs.unlinkSync(fotoPath1000px)
-                // sharp(req.file?.path).resize({ width: 500, height: 500 }).toFile(`public/users/500px/${foto}`)
-                // sharp(req.file?.path).resize({ width: 1000, height: 1000 }).toFile(`public/users/1000px/${foto}`)
+                const foto = (_g = req.file) === null || _g === void 0 ? void 0 : _g.originalname;
+                const fotoPath500 = `./public/users/500/${data.foto}`;
+                fs_1.default.unlinkSync(fotoPath500);
+                const fotoPath1000 = `./public/users/1000/${data.foto}`;
+                fs_1.default.unlinkSync(fotoPath1000);
+                yield (0, sharp_1.default)((_h = req.file) === null || _h === void 0 ? void 0 : _h.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + foto);
+                yield (0, sharp_1.default)((_j = req.file) === null || _j === void 0 ? void 0 : _j.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + foto);
+                const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
+                yield db.user.update({
+                    nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir, foto, foto_url
+                }, {
+                    where: { id }
+                });
             }
-            const { nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir } = req.body;
-            const f = (_c = req.file) === null || _c === void 0 ? void 0 : _c.originalname;
-            const update = yield db.User.update({
-                nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir, foto: f
-            }, {
-                where: { id }
-            });
-            return res.json({
-                data: update,
+            return res.status(200).json({
                 message: "user updated"
             });
         });
-    }
-    delete(req, res) {
-        throw new Error("Method not implemented.");
+        this.delete = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const { id } = req.params;
+            const data = yield db.user.findOne({
+                where: {
+                    id: id
+                },
+            });
+            const fotoPath500 = `./public/users/500/${data.foto}`;
+            fs_1.default.unlinkSync(fotoPath500);
+            const fotoPath1000 = `./public/users/1000/${data.foto}`;
+            fs_1.default.unlinkSync(fotoPath1000);
+            yield db.user.destroy({
+                data,
+                where: {
+                    id
+                }
+            });
+            return res.send({
+                message: 'data delete'
+            });
+        });
     }
 }
 exports.default = new UserController();
