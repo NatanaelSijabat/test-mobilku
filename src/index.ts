@@ -27,12 +27,12 @@ class App {
     }
 
     protected plugins(): void {
-        this.app.use(bodyParser.json())
-        this.app.use(morgan('dev'))
-        this.app.use(compression())
-        this.app.use(helmet())
         this.app.use(cors({ credentials: true, origin: process.env.API_APP, allowedHeaders: "Content-Type" }))
-        this.app.use(express.urlencoded({ extended: false }))
+        this.app.use(helmet())
+        this.app.use(morgan('dev'))
+        this.app.use(bodyParser.json())
+        this.app.use(express.urlencoded({ extended: true }))
+        this.app.use(compression())
         this.app.use(express.static('public'))
     }
 

@@ -13,7 +13,6 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 //routes
 const UserRoute_1 = __importDefault(require("./routes/UserRoute"));
-// import ImageResize from "./middlewares/Image";
 class App {
     constructor() {
         this.app = (0, express_1.default)();
@@ -24,12 +23,12 @@ class App {
         (0, dotenv_1.config)();
     }
     plugins() {
-        this.app.use(body_parser_1.default.json());
-        this.app.use((0, morgan_1.default)('dev'));
-        this.app.use((0, compression_1.default)());
-        this.app.use((0, helmet_1.default)());
         this.app.use((0, cors_1.default)({ credentials: true, origin: process.env.API_APP, allowedHeaders: "Content-Type" }));
-        this.app.use(express_1.default.urlencoded({ extended: false }));
+        this.app.use((0, helmet_1.default)());
+        this.app.use((0, morgan_1.default)('dev'));
+        this.app.use(body_parser_1.default.json());
+        this.app.use(express_1.default.urlencoded({ extended: true }));
+        this.app.use((0, compression_1.default)());
         this.app.use(express_1.default.static('public'));
     }
     route() {
