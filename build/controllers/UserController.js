@@ -18,102 +18,88 @@ const db = require('../db/models');
 class UserController {
     constructor() {
         this.index = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield db.user.findAll({
-                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
+            const data = yield db.users.findAll({
+                attributes: ['id', 'name', 'birth', 'usia', 'mobile', 'city', 'education', 'image']
             });
             return res.status(200).json({ data });
         });
         this.create = (req, res) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d, _e;
-            const { nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir } = req.body;
-            const foto = (_a = req.file) === null || _a === void 0 ? void 0 : _a.originalname;
-            yield (0, sharp_1.default)((_b = req.file) === null || _b === void 0 ? void 0 : _b.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + ((_c = req.file) === null || _c === void 0 ? void 0 : _c.originalname));
-            yield (0, sharp_1.default)((_d = req.file) === null || _d === void 0 ? void 0 : _d.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + ((_e = req.file) === null || _e === void 0 ? void 0 : _e.originalname));
             if (!req.file || Object.keys(req.file).length === 0) {
                 return res.status(400).json({
                     message: 'no files upload'
                 });
             }
-            const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
-            const data = yield db.user.create({
-                nama,
-                tanggal_lahir,
+            yield (0, sharp_1.default)((_a = req.file) === null || _a === void 0 ? void 0 : _a.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + ((_b = req.file) === null || _b === void 0 ? void 0 : _b.originalname));
+            yield (0, sharp_1.default)((_c = req.file) === null || _c === void 0 ? void 0 : _c.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + ((_d = req.file) === null || _d === void 0 ? void 0 : _d.originalname));
+            const { name, birth, usia, mobile, city, education } = req.body;
+            const imageName = (_e = req.file) === null || _e === void 0 ? void 0 : _e.originalname;
+            const image = `${req.protocol}://${req.get("host")}/users/500/${imageName}`;
+            const data = yield db.users.create({
+                name,
+                birth,
                 usia,
-                no_wa,
-                asal_kota,
-                pendidikan_terakhir,
-                foto,
-                foto_url
+                mobile,
+                city,
+                education,
+                image,
+                imageName
             });
-            return res.status(201).send({
-                data
-            });
+            return res.status(201).send({ data });
         });
         this.show = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
-            const data = yield db.user.findOne({
+            const data = yield db.users.findOne({
                 where: {
                     id: id
                 },
-                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
+                attributes: ['id', 'name', 'birth', 'usia', 'mobile', 'city', 'education', 'image']
             });
             if (!data)
                 return res.status(404).json({ message: 'no data found' });
-            return res.json(data);
+            return res.json({ data });
         });
         this.update = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            var _f, _g, _h, _j;
+            var _f, _g, _h;
             const { id } = req.params;
-            const data = yield db.user.findOne({
+            const data = yield db.users.findOne({
                 where: {
                     id: id
                 },
-                attributes: ['nama', 'tanggal_lahir', 'usia', 'no_wa', 'asal_kota', 'pendidikan_terakhir', 'foto', 'foto_url']
+                attributes: ['id', 'name', 'birth', 'usia', 'mobile', 'city', 'education', 'image', 'imageName']
             });
             if (!data)
                 return res.status(404).json({ message: 'no data found' });
-            const { nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir } = req.body;
-            let foto = '';
-            if (((_f = req.file) === null || _f === void 0 ? void 0 : _f.originalname) == null) {
-                foto = data.foto;
-                const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
-                yield db.user.update({
-                    nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir, foto, foto_url
-                }, {
-                    where: { id }
-                });
-            }
-            else {
-                const foto = (_g = req.file) === null || _g === void 0 ? void 0 : _g.originalname;
-                const fotoPath500 = `./public/users/500/${data.foto}`;
-                fs_1.default.unlinkSync(fotoPath500);
-                const fotoPath1000 = `./public/users/1000/${data.foto}`;
-                fs_1.default.unlinkSync(fotoPath1000);
-                yield (0, sharp_1.default)((_h = req.file) === null || _h === void 0 ? void 0 : _h.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + foto);
-                yield (0, sharp_1.default)((_j = req.file) === null || _j === void 0 ? void 0 : _j.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + foto);
-                const foto_url = `${req.protocol}://${req.get("host")}/users/500/${foto}`;
-                yield db.user.update({
-                    nama, tanggal_lahir, usia, no_wa, asal_kota, pendidikan_terakhir, foto, foto_url
-                }, {
-                    where: { id }
-                });
-            }
+            const { name, birth, usia, mobile, city, education } = req.body;
+            const imageName = (_f = req.file) === null || _f === void 0 ? void 0 : _f.originalname;
+            const fotoPath500 = `./public/users/500/${data.imageName}`;
+            fs_1.default.unlinkSync(fotoPath500);
+            const fotoPath1000 = `./public/users/1000/${data.imageName}`;
+            fs_1.default.unlinkSync(fotoPath1000);
+            yield (0, sharp_1.default)((_g = req.file) === null || _g === void 0 ? void 0 : _g.buffer).resize({ width: 500, height: 500 }).toFile('public/users/500/' + imageName);
+            yield (0, sharp_1.default)((_h = req.file) === null || _h === void 0 ? void 0 : _h.buffer).resize({ width: 1000, height: 1000 }).toFile('public/users/1000/' + imageName);
+            const image = `${req.protocol}://${req.get("host")}/users/500/${imageName}`;
+            yield db.users.update({
+                name, birth, usia, mobile, city, education, image, imageName
+            }, {
+                where: { id }
+            });
             return res.status(200).json({
                 message: "user updated"
             });
         });
         this.delete = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { id } = req.params;
-            const data = yield db.user.findOne({
+            const data = yield db.users.findOne({
                 where: {
                     id: id
                 },
             });
-            const fotoPath500 = `./public/users/500/${data.foto}`;
+            const fotoPath500 = `./public/users/500/${data.imageName}`;
             fs_1.default.unlinkSync(fotoPath500);
-            const fotoPath1000 = `./public/users/1000/${data.foto}`;
+            const fotoPath1000 = `./public/users/1000/${data.imageName}`;
             fs_1.default.unlinkSync(fotoPath1000);
-            yield db.user.destroy({
+            yield db.users.destroy({
                 data,
                 where: {
                     id

@@ -6,7 +6,9 @@ import { config as dotenv } from 'dotenv'
 import compression from 'compression'
 import cors from 'cors'
 import helmet from "helmet"
-import http from 'http'
+
+
+import referrerPolicy from 'referrer-policy'
 
 //routes
 import UserRoute from "./routes/UserRoute";
@@ -27,21 +29,22 @@ class App {
     }
 
     protected plugins(): void {
-        this.app.use(cors({ credentials: true, origin: process.env.API_APP, allowedHeaders: "Content-Type" }))
+        this.app.use(cors({ credentials: true, origin: process.env.API_APP, methods: ['GET', 'POST', 'PUT', 'DELETE'], allowedHeaders: ["Content-Type", "*"] }))
         this.app.use(helmet())
         this.app.use(morgan('dev'))
-        this.app.use(bodyParser.json())
+        this.app.use(express.json())
         this.app.use(express.urlencoded({ extended: true }))
         this.app.use(compression())
         this.app.use(express.static('public'))
+        this.app.use(referrerPolicy({ policy: 'same-origin' }))
     }
-
+    
     protected route(): void {
         this.app.route('/').get((req: Request, res: Response) => {
             res.send("test")
         })
 
-        this.app.use("/api/v1/users", this.upload.single('foto'), UserRoute)
+        this.app.use("/api/v1/users", this.upload.single('image'), UserRoute)
     }
 }
 

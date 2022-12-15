@@ -9,35 +9,35 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      nama: {
+      name: {
         type: Sequelize.STRING
       },
-      tanggal_lahir: {
+      birth: {
         type: Sequelize.DATEONLY
       },
       usia: {
         type: Sequelize.INTEGER
       },
-      no_wa: {
+      mobile: {
         type: Sequelize.STRING
       },
-      asal_kota: {
+      city: {
         type: Sequelize.STRING
       },
-      pendidikan_terakhir: {
+      education: {
         type: Sequelize.STRING
       },
-      foto: {
+      image: {
         type: Sequelize.STRING
       },
-      foto_url: {
+      imageName: {
         type: Sequelize.STRING
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
